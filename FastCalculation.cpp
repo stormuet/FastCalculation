@@ -5,6 +5,7 @@
 #include <sstream>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SDL_mixer.h>
 using namespace std;
 
 
@@ -16,7 +17,7 @@ int RandomX(int lv) {
 	else return 100 + rand() % 900;
 }
 int RandomCal() {
-	int a = 4;//1 + rand() % 4;
+	int a = 1 + rand() % 4;
 	return a;
 }
 int RandomY(int a, int lv) {
@@ -152,9 +153,16 @@ string RandomAnswer3(int b, double CorrectAnswer) {
 	s = ss.str();
 	return s;
 }
+string QuestionNumber(int &lv) {
+	stringstream ss;
+	string s;
+	ss << "Question " << lv << " :";
+	s = ss.str();
+	return s;
+}
 
 SDL_Renderer* renderer;
-SDL_Texture* loadTexture(string filePath, SDL_Renderer* renderer);
+//SDL_Texture* loadTexture(string filePath, SDL_Renderer* renderer);
 SDL_Texture* loadTexture(string filePath, SDL_Renderer* renderer) {
 	SDL_Surface* loadIMG = nullptr;
 	SDL_Texture* texture = nullptr;
@@ -186,30 +194,30 @@ void textRender(int x, int y, int size, string str, SDL_Renderer* renderer) {
 	SDL_DestroyTexture(text);
 }
 void Setup(int b, string ranswer1, string ranswer2, string ranswer3, string s, string s0) {
-	textRender(250, 100, 70, s.c_str(), renderer);
+	textRender(310, 125, 88, s.c_str(), renderer);
 	if (b == 1) {
-		textRender(350, 350, 50, ranswer1.c_str(), renderer);
-		textRender(100, 450, 50, s0.c_str(), renderer);
-		textRender(600, 450, 50, ranswer2.c_str(), renderer);
-		textRender(350, 600, 50, ranswer3.c_str(), renderer);
+		textRender(400, 440, 45, ranswer1.c_str(), renderer);
+		textRender(85, 620, 45, s0.c_str(), renderer);
+		textRender(725, 620, 45, ranswer2.c_str(), renderer);
+		textRender(400, 790, 45, ranswer3.c_str(), renderer);
 	}
 	if (b == 2) {
-		textRender(350, 350, 50, s0.c_str(), renderer);
-		textRender(100, 450, 50, ranswer1.c_str(), renderer);
-		textRender(600, 450, 50, ranswer2.c_str(), renderer);
-		textRender(350, 600, 50, ranswer3.c_str(), renderer);
+		textRender(400, 440, 45, s0.c_str(), renderer);
+		textRender(85, 620, 45, ranswer1.c_str(), renderer);
+		textRender(725, 620, 45, ranswer2.c_str(), renderer);
+		textRender(400, 790, 45, ranswer3.c_str(), renderer);
 	}
 	if (b == 3) {
-		textRender(350, 350, 50, ranswer2.c_str(), renderer);
-		textRender(100, 450, 50, ranswer1.c_str(), renderer);
-		textRender(600, 450, 50, s0.c_str(), renderer);
-		textRender(350, 600, 50, ranswer3.c_str(), renderer);
+		textRender(400, 440, 45, ranswer2.c_str(), renderer);
+		textRender(85, 620, 45, ranswer1.c_str(), renderer);
+		textRender(725, 620, 45, s0.c_str(), renderer);
+		textRender(400, 790, 45, ranswer3.c_str(), renderer);
 	}
 	if (b == 4) {
-		textRender(350, 350, 50, ranswer2.c_str(), renderer);
-		textRender(100, 450, 50, ranswer1.c_str(), renderer);
-		textRender(600, 450, 50, ranswer3.c_str(), renderer);
-		textRender(350, 600, 50, s0.c_str(), renderer);
+		textRender(400, 440, 45, ranswer2.c_str(), renderer);
+		textRender(85, 620, 45, ranswer1.c_str(), renderer);
+		textRender(725, 620, 45, ranswer3.c_str(), renderer);
+		textRender(400, 790, 45, s0.c_str(), renderer);
 	}
 }
 void waitUntilKeyPressed()
@@ -222,28 +230,39 @@ void waitUntilKeyPressed()
 		SDL_Delay(100);
 	}
 }
+
 int main(int argc, char* argv[]) {
 	
 	SDL_Window* window = nullptr;
 	SDL_Surface* windowSurface = nullptr;
 	SDL_Surface* imageSurface = nullptr;
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+
 	//initSDL(window, renderer, 800, 709, "FastCalculation_byVuDucLong(StormUET)");
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) cout << "Video Error: " << SDL_GetError() << endl;
 	else
 	{
-		window = SDL_CreateWindow("FastCalculation_byVuDucLong(StormUET)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 709, SDL_WINDOW_SHOWN);
+		window = SDL_CreateWindow("FastCalculation_byVuDucLong(StormUET)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1000, 886, SDL_WINDOW_SHOWN);
 		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED |
 			SDL_RENDERER_PRESENTVSYNC);
 		if (window == NULL) cout << " WindowCreation Error" << SDL_GetError() << endl;
 		if (renderer == NULL) cout << " WindowCreation Error" << SDL_GetError() << endl;
-		SDL_RenderSetLogicalSize(renderer, 800, 709);
+		SDL_RenderSetLogicalSize(renderer, 1000, 886);
 	}
+
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+		cout << "Error: " << Mix_GetError() << endl;
+	Mix_Music* bgm = Mix_LoadMUS("BackgroundMS.mp3");
+	Mix_Chunk* soundEffect = Mix_LoadWAV("Clap.wav");
+	if (!Mix_PlayingMusic()) Mix_PlayMusic(bgm, -1);
+	else if (Mix_PausedMusic()) Mix_ResumeMusic();
+	else Mix_PauseMusic();
+
 	SDL_RenderClear(renderer);
 
 	SDL_Texture* BGTexture;
 	int textureWidth, textureHeight;
-	BGTexture = loadTexture("BackgroundBTL.BMP", renderer);
+	BGTexture = loadTexture("BackgroundBTLL.BMP", renderer);
 	SDL_QueryTexture(BGTexture, NULL, NULL, &textureWidth, &textureHeight);
 	SDL_Rect player;
 	player.x = 0;
@@ -254,14 +273,18 @@ int main(int argc, char* argv[]) {
 	SDL_Rect backGround;
 	backGround.x = 0;
 	backGround.y = 0;
-	backGround.w = 800;
-	backGround.h = 709;
+	backGround.w = 1000;
+	backGround.h = 886;
 	SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
 	SDL_RenderPresent(renderer);
-	SDL_Delay(100);
+	
+	SDL_Delay(2000);
 
 	
 	srand(time(NULL));
+
+	
+	double extratime = 0;
 	int lv = 1;
 	int x = RandomX(lv);
 	int cal = RandomCal();
@@ -279,24 +302,37 @@ int main(int argc, char* argv[]) {
 	cout << ranswer1 << endl << ranswer2 << endl << ranswer3 << endl;
 	cout << endl;
 	SDL_RenderClear(renderer);
-	BGTexture = loadTexture("BTL01.bmp", renderer);
+	BGTexture = loadTexture("BTLL01.BMP", renderer);
 	SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
 	
 	int c = 0;
+
 	Setup(b, ranswer1, ranswer2, ranswer3, s, s0);
+
 	SDL_RenderPresent(renderer);
 
 	SDL_Event e;
 	while (1) {
 		if (TTF_Init() < 0)
 			cout << "Error TTF: " << TTF_GetError() << endl;
-
-
-		BGTexture = loadTexture("BTL01.bmp", renderer);
+		
+		BGTexture = loadTexture("BTLL01.BMP", renderer);
 		SDL_RenderCopy(renderer, BGTexture, &player, &backGround);		
 		Setup(b, ranswer1, ranswer2, ranswer3, s, s0);
+
+		string QuestionNumbers = QuestionNumber(lv);
+		textRender (20, 10, 30, QuestionNumbers.c_str() , renderer);
+
+		int X = SDL_GetTicks() / 1000;
+		int TimeLimit = 15 - X + 2 + extratime;
+		
+		textRender(850, 10, 30, "Time: ", renderer);
+		textRender(950, 10, 30, to_string(TimeLimit), renderer);
+
 		SDL_RenderPresent(renderer);
-		SDL_Delay(40);
+		
+		if (TimeLimit <= 0) break;
+		SDL_Delay(100);
 		
 			
 		if (SDL_PollEvent(&e) == 0) continue;
@@ -304,13 +340,21 @@ int main(int argc, char* argv[]) {
 		if (e.type == SDL_KEYDOWN) {
 			switch (e.key.keysym.sym) {
 			case SDLK_ESCAPE: break;
-			case SDLK_LEFT: if (b == 1) c = 1; 
+			case SDLK_LEFT: if (b == 1) c = 1;
+						  else c = 2;
+				Mix_PlayChannel(-1, soundEffect, 0);
 				break;
 			case SDLK_RIGHT: if (b == 3) c = 1;
+						   else c = 2;
+				Mix_PlayChannel(-1, soundEffect, 0);
 				break;
 			case SDLK_DOWN: if (b == 4) c = 1;
+						  else c = 2;
+				Mix_PlayChannel(-1, soundEffect, 0);
 				break;
 			case SDLK_UP: if (b == 2) c = 1;
+						else c = 2;
+				Mix_PlayChannel(-1, soundEffect, 0);
 				break;
 			default:;
 			}
@@ -331,20 +375,25 @@ int main(int argc, char* argv[]) {
 			ranswer3 = RandomAnswer3(b, answer);
 			cout << ranswer1 << endl << ranswer2 << endl << ranswer3 << endl;
 			cout << endl;
-			SDL_RenderClear(renderer);
-			
+			SDL_RenderClear(renderer);	
+			extratime += 3;
 		}
-
-		
-		c = 0;
-		//if (Gameover==true) break;
+		if (c == 2) { break; }
+		c = 0;	
 	}
-	system("pause");
+
+	waitUntilKeyPressed();
+	Mix_FreeChunk(soundEffect);
+	Mix_FreeMusic(bgm);
+	bgm = nullptr;
+	soundEffect = nullptr;
 	SDL_FreeSurface(imageSurface);
 	imageSurface = nullptr;
 	SDL_DestroyWindow(window);
 	window = nullptr;
 	windowSurface = nullptr;
+	//waitUntilKeyPressed();
+	Mix_Quit();
 	SDL_Quit();
 	return 0;
 	//	system("pause");
