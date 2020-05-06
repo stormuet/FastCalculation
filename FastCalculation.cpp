@@ -434,7 +434,7 @@ int main(int argc, char* argv[]) {
 				ranswer2 = RandomAnswer2(b, answer);
 				ranswer3 = RandomAnswer3(b, answer);
 				SDL_RenderClear(renderer);
-				extratime += 5;
+				extratime += 2;
 			}
 			if (c == 2) { break; }
 			c = 0;
