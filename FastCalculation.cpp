@@ -162,6 +162,7 @@ string QuestionNumber(int &lv) {
 }
 
 SDL_Renderer* renderer;
+SDL_Renderer* rendererX;
 //SDL_Texture* loadTexture(string filePath, SDL_Renderer* renderer);
 SDL_Texture* loadTexture(string filePath, SDL_Renderer* renderer) {
 	SDL_Surface* loadIMG = nullptr;
@@ -256,6 +257,7 @@ int ChooseMode(Mix_Chunk *soundEffect, int c) {
 		}
 	}
 }
+
 int RestartOrExit(Mix_Chunk* soundEffect) {
 	SDL_Event event;
 	while (1) {
@@ -275,6 +277,7 @@ int RestartOrExit(Mix_Chunk* soundEffect) {
 		}
 	}
 }
+
 int TURN = 1;
 int main(int argc, char* argv[]) {
 	//Create Window
@@ -298,7 +301,7 @@ int main(int argc, char* argv[]) {
 	Mix_Music* bgm = Mix_LoadMUS("BackgroundMS.mp3");
 	Mix_Chunk* soundEffect = Mix_LoadWAV("Clap.wav");
 	
-	//Create Text
+	//Create Texture
 	SDL_Texture* BGTexture;
 	int textureWidth, textureHeight;
 	BGTexture = loadTexture("BackgroundBTLL.BMP", renderer);
@@ -308,6 +311,7 @@ int main(int argc, char* argv[]) {
 	player.y = 0;
 	player.w = textureWidth;
 	player.h = textureHeight;
+
 
 	SDL_Rect backGround;
 	backGround.x = 0;
@@ -320,6 +324,8 @@ int main(int argc, char* argv[]) {
 	waitUntilKeyPressed();
 	SDL_RenderClear(renderer);
 	
+	
+
 	//Start Music
 	if (!Mix_PlayingMusic()) Mix_PlayMusic(bgm, -1);
 	else if (Mix_PausedMusic()) Mix_ResumeMusic();
@@ -334,7 +340,6 @@ int main(int argc, char* argv[]) {
 	
 	int c = 0;
 	do {
-
 		//Choosing mode
 		BGTexture = loadTexture("BTLL02.BMP", renderer);
 		SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
@@ -343,6 +348,12 @@ int main(int argc, char* argv[]) {
 
 		int mode = ChooseMode(soundEffect, c);
 		if (mode == 0) break;
+		
+		SDL_RenderClear(renderer);
+		//Loading BG Ques
+		BGTexture = loadTexture("BTLL01.BMP", renderer);
+		SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
+
 		//Set up Ques-Ans
 		srand(time(NULL));
 		double extratime = 0;
@@ -357,15 +368,9 @@ int main(int argc, char* argv[]) {
 		string ranswer1 = RandomAnswer1(b, answer);
 		string ranswer2 = RandomAnswer2(b, answer);
 		string ranswer3 = RandomAnswer3(b, answer);
-		SDL_RenderClear(renderer);
-		//Loading BG Ques
-		BGTexture = loadTexture("BTLL01.BMP", renderer);
-		SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
 
-
-
-		int start;
-		start = SDL_GetTicks() / 1000;
+		
+		double start = SDL_GetTicks() / 1000;
 		Setup(b, ranswer1, ranswer2, ranswer3, s, s0);
 		//currentTick = getTicks()
 		//SDL_RenderPresent(renderer);
@@ -373,6 +378,12 @@ int main(int argc, char* argv[]) {
 		imageSurface = nullptr;
 		SDL_Event e;
 		int Score = 0;
+		double timepause = 0;
+		double timepauseX = 0;
+		double timepausebefore = 0;
+		double timepauseafter = 0;
+		int u = 0;
+		//int pause = 0;
 		while (1) {
 			if (TTF_Init() < 0)
 				cout << "Error TTF: " << TTF_GetError() << endl;
@@ -384,23 +395,64 @@ int main(int argc, char* argv[]) {
 			textRender(20, 10, 30, QuestionNumbers.c_str(), renderer);
 			
 			//Timer
-			int X = SDL_GetTicks() / 1000;
-			int TimeLimit = mode - X + start + extratime;
+			double X = SDL_GetTicks() / 1000;
+
+			if (u == 1) {
+				timepauseafter = SDL_GetTicks() / 1000;
+				timepause = timepauseafter - timepausebefore;
+				timepauseX += timepause;
+			}
+
+			cout << timepausebefore << endl;
+			cout << timepauseafter << endl;
+			
+			
+			int TimeLimit = mode - X + start + extratime + timepauseX;
+			
+			cout << TimeLimit << " = " << mode << " - " << X << " + " << start << " + " << extratime << " + " << timepauseafter << " - " << timepausebefore << endl;
+			cout << timepause << endl;
+			
+			
 			//Print Score and Time
 			textRender(850, 10, 30, "Time: ", renderer);
 			textRender(950, 10, 30, to_string(TimeLimit), renderer);
 			textRender(450, 10, 30, "Score: ", renderer);
 			textRender(550, 10, 30, to_string(Score), renderer);
+			
 			SDL_RenderPresent(renderer);
 
+			u = 0;
 			if (TimeLimit <= 0) break;
 			SDL_Delay(400);
 
+			
 			if (SDL_PollEvent(&e) == 0) continue;
 			if (e.type == SDL_QUIT) break;
 			if (e.type == SDL_KEYDOWN) {
 				switch (e.key.keysym.sym) {
-				case SDLK_ESCAPE: break;
+				case SDLK_0: while (1) {
+					timepausebefore = SDL_GetTicks() / 1000;
+					u = 1; 
+					BGTexture = loadTexture("Gameover.BMP", renderer);
+					SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
+					textRender(350, 100, 80, "Paused", renderer);
+					textRender(370, 230, 40, "Time: ", renderer);
+					textRender(550, 230, 40, to_string(TimeLimit), renderer);
+					textRender(370, 310, 40, "Score: ", renderer);
+					//textRender(600, 230, 40, "s", renderer);
+					textRender(550, 310, 40, to_string(Score), renderer);
+
+					SDL_RenderPresent(renderer);
+
+					waitUntilKeyPressed();
+					SDL_RenderClear(renderer);
+					break;
+					};
+			
+					cout << "Tang " << timepausebefore << endl;
+					break;
+				
+				//case SDLK_1: break;
 				case SDLK_LEFT: if (b == 1) c = 1;
 							  else c = 2;
 					Mix_PlayChannel(-1, soundEffect, 0);
@@ -420,6 +472,7 @@ int main(int argc, char* argv[]) {
 				default:;
 				}
 			}
+			
 			if (c == 1) {
 				lv += 1;
 				Score += 10;
