@@ -298,13 +298,16 @@ int main(int argc, char* argv[]) {
 	//Create Music Song and Music Chunk
 	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
 		cout << "Error: " << Mix_GetError() << endl;
-	Mix_Music* bgm = Mix_LoadMUS("BackgroundMS.mp3");
-	Mix_Chunk* soundEffect = Mix_LoadWAV("Clap.wav");
+	Mix_Music* bgm = Mix_LoadMUS("BackgroundMSN.mp3");
+	Mix_Chunk* soundEffect = Mix_LoadWAV("YayNew.wav");
+	Mix_Chunk* soundEffectE = Mix_LoadWAV("Nope.wav");
+	Mix_Chunk* soundEffectP = Mix_LoadWAV("Pause.wav");
+	Mix_Chunk* soundEffectI = Mix_LoadWAV("Intro.wav");
 	
 	//Create Texture
 	SDL_Texture* BGTexture;
 	int textureWidth, textureHeight;
-	BGTexture = loadTexture("BackgroundBTLL.BMP", renderer);
+	BGTexture = loadTexture("BackgroundBTLLNew.BMP", renderer);
 	SDL_QueryTexture(BGTexture, NULL, NULL, &textureWidth, &textureHeight);
 	SDL_Rect player;
 	player.x = 0;
@@ -319,7 +322,9 @@ int main(int argc, char* argv[]) {
 	backGround.w = 1000;
 	backGround.h = 886;
 	SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
+	
 	SDL_RenderPresent(renderer);
+	
 	/*SDL_Delay(2000);*/
 	waitUntilKeyPressed();
 	SDL_RenderClear(renderer);
@@ -330,16 +335,19 @@ int main(int argc, char* argv[]) {
 	if (!Mix_PlayingMusic()) Mix_PlayMusic(bgm, -1);
 	else if (Mix_PausedMusic()) Mix_ResumeMusic();
 	else Mix_PauseMusic();
-	SDL_RenderClear(renderer);
+	
 	
 	//Keys to play
-	BGTexture = loadTexture("BTLL03.BMP", renderer);
+	BGTexture = loadTexture("BTLControll.BMP", renderer);
 	SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
 	SDL_RenderPresent(renderer);
+
 	waitUntilKeyPressed();
 	
 	int c = 0;
 	do {
+		//if (Mix_PausedMusic()) Mix_PlayMusic(bgm, -1);
+		
 		//Choosing mode
 		BGTexture = loadTexture("BTLL02.BMP", renderer);
 		SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
@@ -348,7 +356,8 @@ int main(int argc, char* argv[]) {
 
 		int mode = ChooseMode(soundEffect, c);
 		if (mode == 0) break;
-		
+		Mix_PlayChannel(-1, soundEffectI, 0);
+
 		SDL_RenderClear(renderer);
 		//Loading BG Ques
 		BGTexture = loadTexture("BTLL01.BMP", renderer);
@@ -431,16 +440,18 @@ int main(int argc, char* argv[]) {
 			if (e.type == SDL_KEYDOWN) {
 				switch (e.key.keysym.sym) {
 				case SDLK_0: while (1) {
+					Mix_PlayChannel(-1, soundEffectP, 0);
 					timepausebefore = SDL_GetTicks() / 1000;
 					u = 1; 
 					BGTexture = loadTexture("Gameover.BMP", renderer);
 					SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
-					textRender(350, 100, 80, "Paused", renderer);
-					textRender(370, 230, 40, "Time: ", renderer);
-					textRender(550, 230, 40, to_string(TimeLimit), renderer);
-					textRender(370, 310, 40, "Score: ", renderer);
+					textRender(350, 80, 80, "Paused", renderer);
+					textRender(370, 200, 40, "Time: ", renderer);
+					textRender(550, 200, 40, to_string(TimeLimit), renderer);
+					textRender(370, 260, 40, "Score: ", renderer);
 					//textRender(600, 230, 40, "s", renderer);
-					textRender(550, 310, 40, to_string(Score), renderer);
+					textRender(550, 260, 40, to_string(Score), renderer);
+					textRender(330, 330, 20, "Press  any  key  to  continue...", renderer);
 
 					SDL_RenderPresent(renderer);
 
@@ -455,25 +466,26 @@ int main(int argc, char* argv[]) {
 				//case SDLK_1: break;
 				case SDLK_LEFT: if (b == 1) c = 1;
 							  else c = 2;
-					Mix_PlayChannel(-1, soundEffect, 0);
+					//Mix_PlayChannel(-1, soundEffect, 0);
 					break;
 				case SDLK_RIGHT: if (b == 3) c = 1;
 							   else c = 2;
-					Mix_PlayChannel(-1, soundEffect, 0);
+					//Mix_PlayChannel(-1, soundEffect, 0);
 					break;
 				case SDLK_DOWN: if (b == 4) c = 1;
 							  else c = 2;
-					Mix_PlayChannel(-1, soundEffect, 0);
+					//Mix_PlayChannel(-1, soundEffect, 0);
 					break;
 				case SDLK_UP: if (b == 2) c = 1;
 							else c = 2;
-					Mix_PlayChannel(-1, soundEffect, 0);
+					//Mix_PlayChannel(-1, soundEffect, 0);
 					break;
 				default:;
 				}
 			}
 			
 			if (c == 1) {
+				Mix_PlayChannel(-1, soundEffect, 0);
 				lv += 1;
 				Score += 10;
 				x = RandomX(lv);
@@ -489,10 +501,13 @@ int main(int argc, char* argv[]) {
 				SDL_RenderClear(renderer);
 				extratime += 2;
 			}
-			if (c == 2) { break; }
+			if (c == 2) {  break; }
 			c = 0;
 		}
 		SDL_RenderClear(renderer);
+		//Mix_PauseMusic();
+		
+		Mix_PlayChannel(-1, soundEffectE, 0);
 		//Print Score (end)
 		BGTexture = loadTexture("Gameover.BMP", renderer);
 		SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
@@ -505,12 +520,13 @@ int main(int argc, char* argv[]) {
 		SDL_RenderClear(renderer);
 		BGTexture = loadTexture("Gameover.BMP", renderer);
 		SDL_RenderCopy(renderer, BGTexture, &player, &backGround);
-		textRender(350, 200, 80, "Play Again", renderer);
-		textRender(450, 400, 80, "Exit", renderer);
+		textRender(320, 150, 80, "Play Again", renderer);
+		textRender(420, 300, 80, "Exit", renderer);
 		SDL_RenderPresent(renderer);
 		TURN = RestartOrExit(soundEffect);
 		c = 0;
 		Score = 0;
+
 	} while (TURN==1);
 
 	Mix_FreeChunk(soundEffect);
